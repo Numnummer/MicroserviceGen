@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MicroserviceGen.CLI", "MicroserviceGen.CLI\MicroserviceGen.CLI.csproj", "{583EC70D-69B3-49AE-845C-C30381FCA0AB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MicroserviceGen.Domain", "MicroserviceGen.Domain\MicroserviceGen.Domain.csproj", "{2EE35FD0-6C4D-413C-9FFE-989AF4601EA5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{583EC70D-69B3-49AE-845C-C30381FCA0AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{583EC70D-69B3-49AE-845C-C30381FCA0AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{583EC70D-69B3-49AE-845C-C30381FCA0AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{583EC70D-69B3-49AE-845C-C30381FCA0AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2EE35FD0-6C4D-413C-9FFE-989AF4601EA5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2EE35FD0-6C4D-413C-9FFE-989AF4601EA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2EE35FD0-6C4D-413C-9FFE-989AF4601EA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2EE35FD0-6C4D-413C-9FFE-989AF4601EA5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
