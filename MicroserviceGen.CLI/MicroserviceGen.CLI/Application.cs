@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using System.Reflection;
 using MicroserviceGen.CLI.Attributes;
+using MicroserviceGen.CLI.Controllers;
 
 namespace MicroserviceGen.CLI;
 
@@ -14,6 +15,16 @@ public class Application:IConsoleApplication
 
         foreach (var flag in flags)
         {
+            // Флаг --template отследим отдельно для простоты.
+            if (flag.Key == "template")
+            {
+                var templateController = new BaseScriptController();
+                templateController.InitBaseScript(flag.Value);
+                continue;
+            }
+            
+            // Остальные флаги обрабатываем, находя контроллеры по атрибутам,
+            // чтобы код и архитектура решения были более читаемы.
             var controller = GetController(flag.Key);
             if (controller != null)
             {
