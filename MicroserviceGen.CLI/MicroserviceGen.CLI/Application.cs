@@ -6,8 +6,6 @@ namespace MicroserviceGen.CLI;
 
 public class Application:IConsoleApplication
 {
-    private readonly Dictionary<string, Action<object>> _methodCache = new();
-    
     public void Run(string[] args)
     {
         var flags = args
@@ -39,32 +37,24 @@ public class Application:IConsoleApplication
 
     public void InvokeHandler(object controller, string value)
     {
-        if (_methodCache.TryGetValue(value, out var cachedMethod))
+        var methods = controller.GetType()
+            .GetMethods()
+            .Where(m => m.GetCustomAttributes(typeof(FlagHandlerAttribute), false)
+                .Cast<FlagHandlerAttribute>()
+                .Any(attr => attr.Flag == value));
+
+        var methodInfos = methods as MethodInfo[] ?? methods.ToArray();
+        if (methodInfos.Any())
         {
-            cachedMethod.Invoke(controller);
+            foreach (var method in methodInfos)
+            {
+                var action = CreateMethodDelegate(controller, method);
+                action.Invoke(controller);
+            }
         }
         else
         {
-            var methods = controller.GetType()
-                .GetMethods()
-                .Where(m => m.GetCustomAttributes(typeof(FlagHandlerAttribute), false)
-                    .Cast<FlagHandlerAttribute>()
-                    .Any(attr => attr.Flag == value));
-
-            var methodInfos = methods as MethodInfo[] ?? methods.ToArray();
-            if (methodInfos.Any())
-            {
-                foreach (var method in methodInfos)
-                {
-                    var action = CreateMethodDelegate(controller, method);
-                    _methodCache[value] = action; 
-                    action.Invoke(controller);
-                }
-            }
-            else
-            {
-                Console.WriteLine($"No handler found for value '{value}'.");
-            }
+            Console.WriteLine($"No handler found for value '{value}'.");
         }
     }
 

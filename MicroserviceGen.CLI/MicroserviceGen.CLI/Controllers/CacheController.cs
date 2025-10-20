@@ -11,7 +11,7 @@ public class CacheController
         Console.WriteLine("Configured to use Redis cache.");
     }
 
-    [FlagHandler("memory")]
+    [FlagHandler("pgsql")]
     public void HandleMemoryCache()
     {
         Console.WriteLine("Configured to use in-memory cache.");

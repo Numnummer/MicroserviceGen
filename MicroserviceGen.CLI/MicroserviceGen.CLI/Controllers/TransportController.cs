@@ -2,8 +2,8 @@ using MicroserviceGen.CLI.Attributes;
 
 namespace MicroserviceGen.CLI.Controllers;
 
-[Controller("transport")]
-public class TransportController
+[Controller("masstransit")]
+public class MasstransitController
 {
     [FlagHandler("kafka")]
     public void HandleKafka()
@@ -11,8 +11,8 @@ public class TransportController
         Console.WriteLine("Configured to use Kafka for transport.");
     }
     
-    [FlagHandler("rabbitmq")]
-    public void HandleRabbitMQ()
+    [FlagHandler("rabbit")]
+    public void HandleRabbitMq()
     {
         Console.WriteLine("Configured to use RabbitMQ for transport.");
     }

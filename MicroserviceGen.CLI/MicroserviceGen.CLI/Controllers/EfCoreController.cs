@@ -11,7 +11,7 @@ public class EfCoreController
         Console.WriteLine("Configured to use PostgreSQL with EF Core.");
     }
 
-    [FlagHandler("mysql")]
+    [FlagHandler("sqlserv")]
     public void HandleMySql()
     {
         Console.WriteLine("Configured to use MySQL with EF Core.");
