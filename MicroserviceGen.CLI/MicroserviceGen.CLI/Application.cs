@@ -7,11 +7,12 @@ namespace MicroserviceGen.CLI;
 
 public class Application:IConsoleApplication
 {
-    public void Run(string[] args)
+    public async Task RunAsync(string[] args)
     {
         var flags = args
             .Select(arg => arg.Split('='))
             .ToDictionary(parts => parts[0].TrimStart('-'), parts => parts.Length > 1 ? parts[1] : string.Empty);
+        
 
         foreach (var flag in flags)
         {
@@ -19,7 +20,7 @@ public class Application:IConsoleApplication
             if (flag.Key == "template")
             {
                 var templateController = new BaseScriptController();
-                templateController.InitBaseScript(flag.Value);
+                await templateController.InitBaseScriptAsync(flag.Value);
                 continue;
             }
             
