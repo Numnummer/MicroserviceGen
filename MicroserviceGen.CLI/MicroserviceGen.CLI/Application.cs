@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using MicroserviceGen.CLI.Attributes;
 using MicroserviceGen.CLI.Controllers;
+using MicroserviceGen.CLI.Controllers.Api;
 
 namespace MicroserviceGen.CLI;
 
@@ -12,19 +13,25 @@ public class Application:IConsoleApplication
         var flags = args
             .Select(arg => arg.Split('='))
             .ToDictionary(parts => parts[0].TrimStart('-'), parts => parts.Length > 1 ? parts[1] : string.Empty);
-        
 
+        // Флаг --template обрабатываем отдельно в первую очередь,
+        // так как это задает базу скрипта.
+        if (flags.TryGetValue("template", out var template))
+        {
+            var templateController = new BaseScriptController();
+            await templateController.InitBaseScriptAsync(template);
+        }
+
+        if (!flags.ContainsKey("api"))
+        {
+            // Если не задан api, то по умолчанию web.
+            var controller = new ApiController();
+            controller.HandleWeb();
+        }
+        
         foreach (var flag in flags)
         {
-            // Флаг --template отследим отдельно для простоты.
-            if (flag.Key == "template")
-            {
-                var templateController = new BaseScriptController();
-                await templateController.InitBaseScriptAsync(flag.Value);
-                continue;
-            }
-            
-            // Остальные флаги обрабатываем, находя контроллеры по атрибутам,
+            // Флаги обрабатываем, находя контроллеры по атрибутам,
             // чтобы код и архитектура решения были более читаемы.
             var controller = GetController(flag.Key);
             if (controller != null)
@@ -36,6 +43,9 @@ public class Application:IConsoleApplication
                 Console.WriteLine($"No controller found for flag '{flag.Key}'.");
             }
         }
+
+        await Script.Instance.RunScriptAsync();
+        //Console.WriteLine(Script.Instance.ScriptText);
     }
 
     public object? GetController(string flag)
