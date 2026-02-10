@@ -14,7 +14,17 @@ public class ApiController
         switch (arch)
         {
             case Architecture.NLayer:
-                Script.Instance.AddCommand(NLayerScripts.Graphql); 
+                var regionStart = "#api_begin";
+                var regionEnd = "#api_end";
+                var apiScript = Script.Instance.GetTextBetween(regionStart, regionEnd);
+                var script = NLayerScripts.Web + NLayerScripts.Graphql;
+                if (apiScript != null)
+                {
+                    Script.Instance.PlaceCommandInRegion(script, regionStart, regionEnd);
+                    return;
+                }
+                script = regionStart + '\n' + script + '\n' + regionEnd;
+                Script.Instance.AddCommand(script); 
                 break;
             case Architecture.Clean:
                 break;
@@ -34,8 +44,9 @@ public class ApiController
         switch (arch)
         {
             case Architecture.NLayer:
-                var after = "dotnet new sln --name _PasteNameHere_";
-                Script.Instance.AddCommandAfter(NLayerScripts.Grpc, after); 
+                var regionStart = "#api_begin";
+                var regionEnd = "#api_end";
+                Script.Instance.PlaceCommandInRegion(NLayerScripts.Grpc, regionStart, regionEnd); 
                 break;
             case Architecture.Clean:
                 break;
@@ -55,8 +66,9 @@ public class ApiController
         switch (arch)
         {
             case Architecture.NLayer:
-                var after = "dotnet new sln --name _PasteNameHere_";
-                Script.Instance.AddCommandAfter(NLayerScripts.Web, after); 
+                var regionStart = "#api_begin";
+                var regionEnd = "#api_end";
+                Script.Instance.PlaceCommandInRegion(NLayerScripts.Web, regionStart, regionEnd); 
                 break;
             case Architecture.Clean:
                 break;

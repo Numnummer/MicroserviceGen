@@ -7,6 +7,8 @@ namespace MicroserviceGen.CLI.Controllers.EfCore;
 [Controller("efcore")]
 public class EfCoreController
 {
+    const string startEfCoreRegion = "#efcore";
+    const string endEfCoreRegion = "#endefcore";
     [FlagHandler("psql")]
     public void HandlePostgres()
     {

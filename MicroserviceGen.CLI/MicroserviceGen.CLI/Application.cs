@@ -3,6 +3,7 @@ using System.Reflection;
 using MicroserviceGen.CLI.Attributes;
 using MicroserviceGen.CLI.Controllers;
 using MicroserviceGen.CLI.Controllers.Api;
+using MicroserviceGen.Domain;
 
 namespace MicroserviceGen.CLI;
 
@@ -24,9 +25,15 @@ public class Application:IConsoleApplication
 
         if (!flags.ContainsKey("api"))
         {
+            var start = "#api_begin";
+            var end = "#api_end";
+            var apiScript = Script.Instance.GetTextBetween(start, end);
             // Если не задан api, то по умолчанию web.
-            var controller = new ApiController();
-            controller.HandleWeb();
+            if (apiScript == null)
+            {
+                var controller = new ApiController();
+                controller.HandleWeb();
+            }            
         }
         
         foreach (var flag in flags)
@@ -43,9 +50,16 @@ public class Application:IConsoleApplication
                 Console.WriteLine($"No controller found for flag '{flag.Key}'.");
             }
         }
+        
+        // Флаг --name обрабатываем отдельно в первую очередь,
+        // так как это задает базу скрипта.
+        if (flags.TryGetValue("name", out var name))
+        {
+            var baseScriptController = new BaseScriptController();
+            baseScriptController.SetBaseName(name);
+        }
 
         await Script.Instance.RunScriptAsync();
-        //Console.WriteLine(Script.Instance.ScriptText);
     }
 
     public object? GetController(string flag)

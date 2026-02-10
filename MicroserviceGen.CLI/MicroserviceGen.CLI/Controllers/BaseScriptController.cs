@@ -28,4 +28,11 @@ public class BaseScriptController
             Console.WriteLine($"Не удалось определить архитектуру: {lines.First()}");
         }
     }
+
+    public void SetBaseName(string baseName)
+    {
+        var contents = "name=";
+        var newRow = $"name={baseName}";
+        Script.Instance.TryReplaceRow(contents, newRow);
+    }
 }
