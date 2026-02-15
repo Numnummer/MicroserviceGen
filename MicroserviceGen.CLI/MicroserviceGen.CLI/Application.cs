@@ -59,6 +59,8 @@ public class Application:IConsoleApplication
             baseScriptController.SetBaseName(name);
         }
 
+
+        Console.WriteLine(Script.Instance.ScriptText);
         await Script.Instance.RunScriptAsync();
     }
 

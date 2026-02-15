@@ -8,7 +8,7 @@ public sealed class Script
     private static readonly Lazy<Script> lazy = new(() => new Script());
     public static Script Instance => lazy.Value;
 
-    private StringBuilder ScriptText { get; set; }
+    public StringBuilder ScriptText { get; private set; }
     public Architecture Architecture { get; private set; }
 
     public async Task RunScriptAsync()
@@ -87,6 +87,79 @@ public sealed class Script
     {
         ScriptText.Append(command);
     }
+
+    /// <summary>
+    /// Берет срез текущего скрипта по региону и заменяет все команды,
+    /// идущие на следующей строке после строки-триггера, на соответствующие
+    /// команды в принимаемой строке (предполагается, что она находится в рамках того
+    /// же региона).
+    /// </summary>
+    /// <param name="regionStart"></param>
+    /// <param name="regionEnd"></param>
+    /// <param name="anotherScript"></param>
+    public bool TryReplaceTriggerCommandsFromAnotherScriptInRegion(string regionStart, string regionEnd, string anotherScript, string triggerCommandLabel)
+    {
+        // Берем текущий скрипт только как срез области, чтобы 
+        // не делать лиших вычислений.
+        var currentScript = GetTextBetween(regionStart, regionEnd);
+        if (currentScript == null) return false;
+        var currentScriptRows = currentScript.Split('\n');
+        var isCurrentScriptPointerReachedTrigger = false;
+        var anotherScriptRows = anotherScript.Split('\n');
+        var isAnotherScriptPointerReachedTrigger = false;
+        var anotherScriptIndex = 0;
+
+        // Это указатель, показывающий позицию в триггерах для замены строки.
+        var matchesFound=0;
+        for (var currentScriptIndex = 0; currentScriptIndex < currentScriptRows.Length;)
+        {
+            if (anotherScriptIndex >= anotherScriptRows.Length - 1) break;
+            if (anotherScriptRows[anotherScriptIndex] == triggerCommandLabel)
+            {
+                isAnotherScriptPointerReachedTrigger = true;
+            }
+            if (currentScriptRows[currentScriptIndex] == triggerCommandLabel)
+            {
+                isCurrentScriptPointerReachedTrigger = true;
+            }
+            if (isAnotherScriptPointerReachedTrigger && isCurrentScriptPointerReachedTrigger)
+            {
+                TryReplaceRowAfter(currentScriptRows[currentScriptIndex], matchesFound, anotherScriptRows[anotherScriptIndex+1]);
+                isAnotherScriptPointerReachedTrigger = false;
+                isCurrentScriptPointerReachedTrigger = false;
+                ++matchesFound;
+            }
+            if (!isAnotherScriptPointerReachedTrigger)
+            {
+                ++anotherScriptIndex;
+            }
+            if (!isCurrentScriptPointerReachedTrigger)
+            {
+                ++currentScriptIndex;
+            }
+        }
+        return true;
+    }
+
+    /// <summary>
+    /// Заменяет в скрипте строку, идущую сразу после afterThis
+    /// на replaceToThis.
+    /// </summary>
+    /// <param name="afterThis"></param>
+    /// <param name="replaceToThis"></param>
+    /// <returns></returns>
+    public bool TryReplaceRowAfter(string afterThis, int triggerSkipCount, string replaceToThis)
+    {
+        var script = ScriptText.ToString();
+        var parts = script.Split(afterThis);
+        var rowToReplace = parts.ElementAtOrDefault(1 + triggerSkipCount)?.Split('\n').ElementAtOrDefault(1);
+        if (rowToReplace != null)
+        {
+            ScriptText.Replace(rowToReplace, replaceToThis);
+            return true;
+        }
+        return false;
+    }
     
     /// <summary>
     /// Вставить команду после первой найденной подстроки after.
@@ -96,7 +169,7 @@ public sealed class Script
     public void AddCommandAfter(string command, string after)
     {
         var parts = ScriptText.ToString().Split(after);
-        string[] newParts = [parts[0], after, command, ..parts[1..]];
+        string[] newParts = [parts[0], after, command, .. parts[1..]];
         ScriptText.Clear().Append(string.Join("\n", newParts));
     }
 
@@ -153,6 +226,7 @@ public sealed class Script
     public void Initialize(string baseScript, Architecture architecture)
     {
         Architecture = architecture;
+        ScriptText.Clear();
         ScriptText.Append(baseScript);
     }
 

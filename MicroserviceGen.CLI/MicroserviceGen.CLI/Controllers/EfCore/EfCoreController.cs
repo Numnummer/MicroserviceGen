@@ -16,7 +16,8 @@ public class EfCoreController
         switch (arch)
         {
             case Architecture.NLayer:
-                Script.Instance.AddCommand(NLayerScripts.Pgsql); 
+                Script.Instance.TryReplaceTriggerCommandsFromAnotherScriptInRegion(startEfCoreRegion, endEfCoreRegion,
+                 NLayerScripts.Pgsql, "#specific_provider"); 
                 break;
             case Architecture.Clean:
                 break;
@@ -36,7 +37,8 @@ public class EfCoreController
         switch (arch)
         {
             case Architecture.NLayer:
-                Script.Instance.AddCommand(NLayerScripts.Sqlserv); 
+                Script.Instance.TryReplaceTriggerCommandsFromAnotherScriptInRegion(startEfCoreRegion, endEfCoreRegion,
+                 NLayerScripts.Sqlserv, "#specific_provider"); 
                 break;
             case Architecture.Clean:
                 break;
@@ -56,7 +58,8 @@ public class EfCoreController
         switch (arch)
         {
             case Architecture.NLayer:
-                Script.Instance.AddCommand(NLayerScripts.Sqlite); 
+                Script.Instance.TryReplaceTriggerCommandsFromAnotherScriptInRegion(startEfCoreRegion, endEfCoreRegion,
+                 NLayerScripts.Sqlite, "#specific_provider"); 
                 break;
             case Architecture.Clean:
                 break;
