@@ -100,44 +100,62 @@ public sealed class Script
     public bool TryReplaceTriggerCommandsFromAnotherScriptInRegion(string regionStart, string regionEnd, string anotherScript, string triggerCommandLabel)
     {
         // Берем текущий скрипт только как срез области, чтобы 
-        // не делать лиших вычислений.
-        var currentScript = GetTextBetween(regionStart, regionEnd);
-        if (currentScript == null) return false;
-        var currentScriptRows = currentScript.Split('\n');
-        var isCurrentScriptPointerReachedTrigger = false;
+        // не делать лишних вычислений.
+        var currentRegion = GetTextBetween(regionStart, regionEnd);
+        if (currentRegion == null) return false;
+        
+        var currentScriptRows = currentRegion.Split('\n');
         var anotherScriptRows = anotherScript.Split('\n');
-        var isAnotherScriptPointerReachedTrigger = false;
-        var anotherScriptIndex = 0;
-
-        // Это указатель, показывающий позицию в триггерах для замены строки.
-        var matchesFound=0;
-        for (var currentScriptIndex = 0; currentScriptIndex < currentScriptRows.Length;)
+        
+        // Собираем из anotherScript все команды, которые идут после триггера
+        var replacementCommands = new List<string>();
+        for (int i = 0; i < anotherScriptRows.Length - 1; i++)
         {
-            if (anotherScriptIndex >= anotherScriptRows.Length - 1) break;
-            if (anotherScriptRows[anotherScriptIndex] == triggerCommandLabel)
+            if (anotherScriptRows[i].Trim() == triggerCommandLabel)
             {
-                isAnotherScriptPointerReachedTrigger = true;
-            }
-            if (currentScriptRows[currentScriptIndex] == triggerCommandLabel)
-            {
-                isCurrentScriptPointerReachedTrigger = true;
-            }
-            if (isAnotherScriptPointerReachedTrigger && isCurrentScriptPointerReachedTrigger)
-            {
-                TryReplaceRowAfter(currentScriptRows[currentScriptIndex], matchesFound, anotherScriptRows[anotherScriptIndex+1]);
-                isAnotherScriptPointerReachedTrigger = false;
-                isCurrentScriptPointerReachedTrigger = false;
-                ++matchesFound;
-            }
-            if (!isAnotherScriptPointerReachedTrigger)
-            {
-                ++anotherScriptIndex;
-            }
-            if (!isCurrentScriptPointerReachedTrigger)
-            {
-                ++currentScriptIndex;
+                replacementCommands.Add(anotherScriptRows[i + 1]);
             }
         }
+        
+        // Заменяем в текущем регионе команды после триггеров
+        var resultRows = new List<string>();
+        var replacementIndex = 0;
+        
+        for (int i = 0; i < currentScriptRows.Length; i++)
+        {
+            resultRows.Add(currentScriptRows[i]);
+            
+            if (currentScriptRows[i].Trim() == triggerCommandLabel && replacementIndex < replacementCommands.Count)
+            {
+                // Нашли триггер, заменяем следующую строку
+                if (i + 1 < currentScriptRows.Length)
+                {
+                    // Пропускаем оригинальную строку после триггера
+                    i++;
+                    // Добавляем новую команду
+                    resultRows.Add(replacementCommands[replacementIndex]);
+                    replacementIndex++;
+                }
+            }
+        }
+        
+        // Формируем новый регион
+        var newRegion = string.Join("\n", resultRows);
+        
+        // Заменяем регион в исходном скрипте
+        var fullScript = ScriptText.ToString();
+        var startIndex = fullScript.IndexOf(regionStart);
+        var endIndex = fullScript.IndexOf(regionEnd, startIndex);
+        
+        if (startIndex == -1 || endIndex == -1) return false;
+        
+        var endOfRegion = endIndex + regionEnd.Length;
+        var beforeRegion = fullScript.Substring(0, startIndex);
+        var afterRegion = fullScript.Substring(endOfRegion);
+        
+        var updatedScript = beforeRegion + regionStart + "\n" + newRegion + "\n" + regionEnd + afterRegion;
+        ScriptText = new StringBuilder(updatedScript);
+        
         return true;
     }
 
